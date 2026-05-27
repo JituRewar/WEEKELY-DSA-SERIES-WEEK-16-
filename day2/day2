@@ -1,0 +1,80 @@
+# Week 16 - Day 2
+
+# LeetCode 547: Number of Provinces
+
+## 📌 Problem Statement
+
+There are `n` cities. Some of them are connected directly, while others are connected indirectly.
+
+If city `a` is connected directly with city `b`, and city `b` is connected directly with city `c`, then city `a` is connected indirectly with city `c`.
+
+A province is a group of directly or indirectly connected cities.
+
+You are given an `n x n` matrix `isConnected` where:
+
+* `isConnected[i][j] = 1` → city `i` and city `j` are connected
+* `isConnected[i][j] = 0` → not connected
+
+Return the total number of provinces.
+
+
+# 🧠 Approach (DFS)
+
+We can treat each city as a node in a graph.
+
+The given matrix is an adjacency matrix:
+
+```cpp
+isConnected[i][j]
+```
+
+tells whether there is an edge between city `i` and city `j`.
+
+We perform DFS:
+
+1. Start from an unvisited city.
+2. Visit all cities connected to it.
+3. Mark them visited.
+4. Increase province count.
+5. Repeat for remaining unvisited cities.
+
+---
+
+## solution.cpp
+
+```cpp
+class Solution {
+public:
+    void dfs(int i, vector<vector<int>>& adj, vector<bool>& vis) {
+        vis[i] = true;
+
+        for (int j = 0; j < adj[i].size(); j++) {
+            if (adj[i][j] == 1 && !vis[j]) {
+                dfs(j, adj, vis);
+            }
+        }
+    }
+
+    int findCircleNum(vector<vector<int>>& isConnected) {
+        int n = isConnected.size();
+        int provinces = 0;
+
+        vector<bool> vis(n, false);
+
+        for (int i = 0; i < n; i++) {
+            if (!vis[i]) {
+                dfs(i, isConnected, vis);
+                provinces++;
+            }
+        }
+
+        return provinces;
+    }
+};
+```
+
+---
+
+
+Week-16-Day-2-Number-Of-Provi
+```
