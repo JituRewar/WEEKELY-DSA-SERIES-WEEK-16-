@@ -1,0 +1,409 @@
+# Week 16 - Day 7
+
+# Kruskal’s Algorithm (Minimum Spanning Tree)
+
+## 📌 Problem Statement
+
+Given a weighted undirected graph, find the Minimum Spanning Tree (MST) using Kruskal’s Algorithm.
+
+A Minimum Spanning Tree:
+
+* Connects all vertices
+* Contains no cycles
+* Has minimum possible total edge weight
+
+---
+
+# 📂 Folder Structure
+
+```text
+Week-16/
+ └── Day-7-Kruskal-Algorithm/
+      ├── README.md
+      ├── solution.cpp
+      └── notes.md
+```
+
+---
+
+# 🧠 What is Kruskal’s Algorithm?
+
+Kruskal’s Algorithm is a greedy algorithm used to find the Minimum Spanning Tree (MST).
+
+It works by:
+
+1. Sorting all edges by weight.
+2. Picking the smallest edge.
+3. Adding it if it does not form a cycle.
+4. Repeating until MST contains:
+
+genui{"math_block_widget_always_prefetch_v2":{"content":"V-1"}}
+
+edges.
+
+---
+
+# ⚙️ Data Structures Used
+
+## 1. Edge Class
+
+```cpp
+(u, v, wt)
+```
+
+Stores:
+
+* source vertex
+* destination vertex
+* edge weight
+
+---
+
+## 2. Edge Sorting
+
+Edges are sorted by weight using comparator:
+
+```cpp
+bool operator<(const Edge &other) const
+```
+
+---
+
+## 3. Disjoint Set Union (DSU)
+
+Used for:
+
+* Cycle Detection
+* Connected Components
+
+Optimizations used:
+
+* Path Compression
+* Union By Rank
+
+---
+
+# ✅ C++ Solution
+
+## solution.cpp
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+class Edge
+{
+public:
+    int u, v, wt;
+
+    Edge(int u, int v, int wt)
+    {
+        this->u = u;
+        this->v = v;
+        this->wt = wt;
+    }
+
+    // Comparator for sorting edges by weight
+    bool operator<(const Edge &other) const
+    {
+        return this->wt < other.wt;
+    }
+};
+
+class Graph
+{
+public:
+    int V;
+    vector<Edge> edges;
+    vector<int> par, rank;
+
+    Graph(int V)
+    {
+        this->V = V;
+
+        for (int i = 0; i < V; i++)
+        {
+            par.push_back(i);
+            rank.push_back(0);
+        }
+    }
+
+    void addEdge(int u, int v, int wt)
+    {
+        edges.push_back(Edge(u, v, wt));
+    }
+
+    int find(int x)
+    {
+        if (par[x] == x)
+        {
+            return x;
+        }
+
+        // Path Compression
+        return par[x] = find(par[x]);
+    }
+
+    void unionByRank(int a, int b)
+    {
+        int parA = find(a);
+        int parB = find(b);
+
+        if (parA == parB)
+            return;
+
+        if (rank[parA] == rank[parB])
+        {
+            par[parB] = parA;
+            rank[parA]++;
+        }
+        else if (rank[parA] > rank[parB])
+        {
+            par[parB] = parA;
+        }
+        else
+        {
+            par[parA] = parB;
+        }
+    }
+
+    void kruskal()
+    {
+        // Sort edges by weight
+        sort(edges.begin(), edges.end());
+
+        int mstCost = 0;
+        int count = 0;
+
+        for (int i = 0; i < edges.size() && count < V - 1; i++)
+        {
+            Edge e = edges[i];
+
+            int parU = find(e.u);
+            int parV = find(e.v);
+
+            // No cycle condition
+            if (parU != parV)
+            {
+                unionByRank(e.u, e.v);
+                mstCost += e.wt;
+                count++;
+            }
+        }
+
+        cout << "MST Cost " << mstCost << endl;
+    }
+};
+
+int main()
+{
+    Graph graph(4);
+
+    graph.addEdge(0, 1, 10);
+    graph.addEdge(0, 2, 6);
+    graph.addEdge(0, 3, 5);
+    graph.addEdge(1, 3, 15);
+    graph.addEdge(2, 3, 4);
+
+    graph.kruskal();
+
+    return 0;
+}
+```
+
+---
+
+# 🔍 Graph Representation
+
+```text
+        10
+   0 -------- 1
+   | \        |
+ 6 |  \5      | 15
+   |   \      |
+   2 -------- 3
+         4
+```
+
+---
+
+# 🔎 Step-by-Step Dry Run
+
+## Step 1: Sort Edges
+
+Sorted Edges:
+
+```text
+(2,3,4)
+(0,3,5)
+(0,2,6)
+(0,1,10)
+(1,3,15)
+```
+
+---
+
+## Step 2: Pick Edge (2,3,4)
+
+No cycle formed.
+
+MST Cost:
+
+```text
+4
+```
+
+---
+
+## Step 3: Pick Edge (0,3,5)
+
+No cycle formed.
+
+MST Cost:
+
+```text
+4 + 5 = 9
+```
+
+---
+
+## Step 4: Pick Edge (0,2,6)
+
+This creates a cycle.
+
+Skip it.
+
+---
+
+## Step 5: Pick Edge (0,1,10)
+
+No cycle formed.
+
+MST Cost:
+
+```text
+9 + 10 = 19
+```
+
+Now MST contains:
+
+genui{"math_block_widget_always_prefetch_v2":{"content":"V-1=3"}}
+
+edges.
+
+Algorithm stops.
+
+---
+
+# ✅ Final MST Cost
+
+```text
+19
+```
+
+---
+
+# ⏱️ Complexity Analysis
+
+## Time Complexity
+
+Sorting edges dominates complexity.
+
+genui{"math_block_widget_always_prefetch_v2":{"content":"O(E\log E)"}}
+
+Where:
+
+* `E` = Number of edges
+
+DSU operations are nearly constant time.
+
+---
+
+## Space Complexity
+
+genui{"math_block_widget_always_prefetch_v2":{"content":"O(V+E)"}}
+
+For:
+
+* edge list
+* parent array
+* rank array
+
+---
+
+# ❓ Why use DSU in Kruskal?
+
+Kruskal must avoid cycles.
+
+DSU efficiently checks:
+
+```text
+Are two vertices already connected?
+```
+
+If yes:
+
+```text
+Adding edge creates cycle.
+```
+
+So we skip that edge.
+
+---
+
+# ❓ Why sort edges?
+
+Kruskal is a greedy algorithm.
+
+At every step we pick:
+
+```text
+Minimum weight edge.
+```
+
+Sorting helps process edges in increasing order.
+
+---
+
+# 🔥 Prim vs Kruskal
+
+| Feature         | Prim           | Kruskal       |
+| --------------- | -------------- | ------------- |
+| Approach        | Vertex Based   | Edge Based    |
+| Uses            | Priority Queue | Sorting + DSU |
+| Best For        | Dense Graphs   | Sparse Graphs |
+| Time Complexity | O(E log V)     | O(E log E)    |
+
+---
+
+# 📝 Key Learning
+
+* Minimum Spanning Tree
+* Greedy Algorithms
+* Edge Sorting
+* Cycle Detection
+* Disjoint Set Union
+* Path Compression
+* Union By Rank
+
+---
+
+# 📘 notes.md
+
+```text
+1. Kruskal is a greedy MST algorithm.
+2. Sort all edges by weight.
+3. Add edge only if it does not create cycle.
+4. DSU helps detect cycles efficiently.
+5. MST contains exactly (V-1) edges.
+6. Time Complexity = O(E log E).
+7. Works best for sparse graphs.
+```
+
+---
+
+# 🚀 GitHub Repository Name Suggestion
+
+```text
+Week-16-Day-7-Kruskal-Algorithm
+```
