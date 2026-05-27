@@ -1,0 +1,337 @@
+# Week 16 - Day 3
+
+# Prim's Algorithm (Minimum Spanning Tree)
+
+## 📌 Problem Statement
+
+Given a weighted undirected graph, find the Minimum Spanning Tree (MST) using Prim’s Algorithm.
+
+A Minimum Spanning Tree is a subset of edges that:
+
+* Connects all vertices
+* Contains no cycles
+* Has the minimum possible total edge weight
+
+---
+
+# 📂 Folder Structure
+
+```text
+Week-16/
+ └── Day-3-Prims-Algorithm/
+      ├── README.md
+      ├── solution.cpp
+      └── notes.md
+```
+
+---
+
+# 🧠 What is Prim’s Algorithm?
+
+Prim’s Algorithm is a greedy algorithm used to find the Minimum Spanning Tree (MST) of a weighted undirected graph.
+
+It works similarly to Dijkstra’s Algorithm.
+
+At every step:
+
+1. Pick the minimum weight edge.
+2. Add the new vertex to MST.
+3. Continue until all vertices are included.
+
+---
+
+# ⚙️ Data Structures Used
+
+## 1. Adjacency List
+
+```cpp
+vector<vector<pair<int,int>>> adj;
+```
+
+Stores:
+
+```cpp
+{neighbor, weight}
+```
+
+---
+
+## 2. Min Heap (Priority Queue)
+
+```cpp
+priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+```
+
+Stores:
+
+```cpp
+{weight, vertex}
+```
+
+Used to always pick the minimum weight edge.
+
+---
+
+## 3. MST Set
+
+```cpp
+vector<bool> mstset(V, false);
+```
+
+Tracks whether a vertex is already included in MST.
+
+---
+
+# ✅ C++ Solution
+
+## solution.cpp
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+// Function to find MST cost using Prim's Algorithm
+int primsMST(int V, vector<vector<pair<int, int>>> adj)
+{
+    vector<bool> mstset(V, false);
+
+    // Min Heap -> {weight, vertex}
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+
+    pq.push({0, 0});
+
+    int minWT = 0;
+
+    while (!pq.empty())
+    {
+        int u = pq.top().second;
+        int wt = pq.top().first;
+        pq.pop();
+
+        if (!mstset[u])
+        {
+            mstset[u] = true;
+            minWT += wt;
+
+            for (int i = 0; i < adj[u].size(); i++)
+            {
+                int v = adj[u][i].first;
+                int w = adj[u][i].second;
+
+                if (!mstset[v])
+                {
+                    pq.push({w, v});
+                }
+            }
+        }
+    }
+
+    return minWT;
+}
+
+int main()
+{
+    int V = 5;
+
+    vector<vector<pair<int, int>>> adj(V);
+
+    // Undirected Weighted Graph
+
+    adj[0].push_back({1, 10});
+    adj[1].push_back({0, 10});
+
+    adj[0].push_back({3, 30});
+    adj[3].push_back({0, 30});
+
+    adj[0].push_back({2, 15});
+    adj[2].push_back({0, 15});
+
+    adj[1].push_back({3, 40});
+    adj[3].push_back({1, 40});
+
+    adj[2].push_back({3, 50});
+    adj[3].push_back({2, 50});
+
+    cout << "Cost of MST " << primsMST(V, adj) << endl;
+
+    return 0;
+}
+```
+
+---
+
+# 🔍 Dry Run
+
+## Graph
+
+```text
+        10
+   0 -------- 1
+   | \        |
+15 |  \30     | 40
+   |   \      |
+   2 -------- 3
+         50
+```
+
+---
+
+## Step-by-Step
+
+### Start from node 0
+
+Push:
+
+```text
+(10,1)
+(15,2)
+(30,3)
+```
+
+---
+
+### Pick minimum edge
+
+```text
+10 -> node 1
+```
+
+MST Cost:
+
+```text
+0 + 10 = 10
+```
+
+---
+
+### Pick next minimum edge
+
+```text
+15 -> node 2
+```
+
+MST Cost:
+
+```text
+10 + 15 = 25
+```
+
+---
+
+### Pick next minimum edge
+
+```text
+30 -> node 3
+```
+
+MST Cost:
+
+```text
+25 + 30 = 55
+```
+
+---
+
+# ✅ Final MST Cost
+
+```text
+55
+```
+
+---
+
+# ⏱️ Complexity Analysis
+
+## Time Complexity
+
+```text
+O(E log V)
+```
+
+Where:
+
+* `E` = Number of edges
+* `V` = Number of vertices
+
+Because every edge may be pushed into the priority queue.
+
+---
+
+## Space Complexity
+
+```text
+O(V + E)
+```
+
+For:
+
+* adjacency list
+* priority queue
+* mstset array
+
+---
+
+# ❓ Why do we use Min Heap?
+
+Prim’s Algorithm is greedy.
+
+At every step we need the edge with minimum weight.
+
+Min heap helps us get:
+
+```text
+Minimum edge in O(log n)
+```
+
+instead of scanning all edges repeatedly.
+
+---
+
+# ❓ Why do we use mstset array?
+
+```cpp
+vector<bool> mstset(V, false);
+```
+
+This array tracks whether a vertex is already included in MST.
+
+Without it:
+
+* same node can be processed multiple times
+* cycles may form
+* MST becomes incorrect
+
+---
+
+# 📝 Key Learning
+
+* Minimum Spanning Tree (MST)
+* Greedy Algorithms
+* Priority Queue / Min Heap
+* Weighted Graph Representation
+* Prim’s Algorithm
+* Difference between Dijkstra and Prim
+
+---
+
+# 📘 notes.md
+
+```text
+1. Prim’s Algorithm works only for weighted undirected graphs.
+2. MST contains exactly (V - 1) edges.
+3. MST has no cycles.
+4. Priority Queue helps choose minimum weight edge.
+5. mstset prevents revisiting vertices.
+6. Time Complexity = O(E log V).
+7. Prim's Algorithm is greedy.
+```
+
+---
+
+# 🚀 GitHub Repository Name Suggestion
+
+```text
+Week-16-Day-3-Prims-Algorithm
+```
+
+  
