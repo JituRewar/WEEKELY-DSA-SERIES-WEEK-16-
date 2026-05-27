@@ -1,0 +1,419 @@
+# Week 16 - Day 5
+
+# Dijkstra Algorithm
+
+## 📌 Problem Statement
+
+Given a weighted graph and a source vertex, find the shortest distance from the source to all other vertices using Dijkstra’s Algorithm.
+
+Dijkstra’s Algorithm works only for:
+
+* Positive edge weights
+* Zero edge weights
+
+It does NOT work correctly for negative edge weights.
+
+---
+
+# 📂 Folder Structure
+
+```text
+Week-16/
+ └── Day-5-Dijkstra-Algorithm/
+      ├── README.md
+      ├── solution.cpp
+      └── notes.md
+```
+
+---
+
+# 🧠 What is Dijkstra’s Algorithm?
+
+Dijkstra’s Algorithm is a greedy shortest path algorithm.
+
+It finds the minimum distance from a source node to all other nodes in a weighted graph.
+
+At every step:
+
+1. Pick the node with minimum distance.
+2. Relax all its adjacent edges.
+3. Update shortest distances.
+
+---
+
+# ⚙️ Data Structures Used
+
+## 1. Adjacency List
+
+```cpp
+vector<vector<Edge>> g;
+```
+
+Stores graph connections.
+
+---
+
+## 2. Distance Array
+
+```cpp
+vector<int> dist(V, INT_MAX);
+```
+
+Stores shortest distance from source to every vertex.
+
+---
+
+## 3. Priority Queue (Min Heap)
+
+```cpp
+priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+```
+
+Stores:
+
+```cpp
+{distance, vertex}
+```
+
+Used to always process the node having the smallest distance.
+
+---
+
+# 🔁 Edge Relaxation
+
+If:
+
+```cpp
+dist[v] > dist[u] + wt
+```
+
+Then:
+
+```cpp
+dist[v] = dist[u] + wt;
+```
+
+Meaning:
+
+We found a shorter path to vertex `v` through vertex `u`.
+
+---
+
+# ✅ C++ Solution
+
+## solution.cpp
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+// Only works for positive or zero weighted graphs
+
+class Edge
+{
+public:
+    int v;
+    int wt;
+
+    Edge(int v, int wt)
+    {
+        this->v = v;
+        this->wt = wt;
+    }
+};
+
+void dijkstra(int src, vector<vector<Edge>> g, int V)
+{
+    vector<int> dist(V, INT_MAX);
+    dist[src] = 0;
+
+    // Min Heap -> {distance, vertex}
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+
+    pq.push({0, src});
+
+    while (!pq.empty())
+    {
+        int u = pq.top().second;
+        pq.pop();
+
+        for (Edge e : g[u])
+        {
+            // Edge Relaxation
+            if (dist[e.v] > dist[u] + e.wt)
+            {
+                dist[e.v] = dist[u] + e.wt;
+                pq.push({dist[e.v], e.v});
+            }
+        }
+    }
+
+    cout << "Shortest Distance From Source:\n";
+
+    for (int i = 0; i < V; i++)
+    {
+        cout << dist[i] << " ";
+    }
+
+    cout << endl;
+}
+
+int main()
+{
+    int V = 6;
+
+    vector<vector<Edge>> g(V);
+
+    g[0].push_back(Edge(1, 2));
+    g[0].push_back(Edge(2, 4));
+
+    g[1].push_back(Edge(2, 1));
+    g[1].push_back(Edge(3, 7));
+
+    g[2].push_back(Edge(4, 3));
+
+    g[3].push_back(Edge(5, 1));
+
+    g[4].push_back(Edge(3, 2));
+    g[4].push_back(Edge(5, 5));
+
+    dijkstra(0, g, V);
+
+    return 0;
+}
+```
+
+---
+
+# 🔍 Graph Representation
+
+```text
+0 --2--> 1
+0 --4--> 2
+1 --1--> 2
+1 --7--> 3
+2 --3--> 4
+4 --2--> 3
+3 --1--> 5
+4 --5--> 5
+```
+
+---
+
+# 🔎 Dry Run
+
+## Initial Distance Array
+
+```text
+[0, INF, INF, INF, INF, INF]
+```
+
+---
+
+## Step 1
+
+Process node 0.
+
+Relax:
+
+```text
+0 → 1 (2)
+0 → 2 (4)
+```
+
+Distance Array:
+
+```text
+[0, 2, 4, INF, INF, INF]
+```
+
+---
+
+## Step 2
+
+Process node 1.
+
+Relax:
+
+```text
+1 → 2 (1)
+1 → 3 (7)
+```
+
+Updated Distance:
+
+```text
+2 = min(4, 2+1) = 3
+3 = 2+7 = 9
+```
+
+Distance Array:
+
+```text
+[0, 2, 3, 9, INF, INF]
+```
+
+---
+
+## Step 3
+
+Process node 2.
+
+Relax:
+
+```text
+2 → 4 (3)
+```
+
+Distance Array:
+
+```text
+[0, 2, 3, 9, 6, INF]
+```
+
+---
+
+## Step 4
+
+Process node 4.
+
+Relax:
+
+```text
+4 → 3 (2)
+4 → 5 (5)
+```
+
+Updated Distance:
+
+```text
+3 = min(9, 6+2) = 8
+5 = 6+5 = 11
+```
+
+Distance Array:
+
+```text
+[0, 2, 3, 8, 6, 11]
+```
+
+---
+
+## Step 5
+
+Process node 3.
+
+Relax:
+
+```text
+3 → 5 (1)
+```
+
+Updated Distance:
+
+```text
+5 = min(11, 8+1) = 9
+```
+
+Final Distance Array:
+
+```text
+[0, 2, 3, 8, 6, 9]
+```
+
+---
+
+# ✅ Final Output
+
+```text
+0 2 3 8 6 9
+```
+
+---
+
+# ⏱️ Complexity Analysis
+
+## Time Complexity
+
+genui{"math_block_widget_always_prefetch_v2":{"content":"O(E\log V)"}}
+
+Where:
+
+* `V` = Number of vertices
+* `E` = Number of edges
+
+Because priority queue operations take:
+
+genui{"math_block_widget_always_prefetch_v2":{"content":"O(\log V)"}}
+
+---
+
+## Space Complexity
+
+genui{"math_block_widget_always_prefetch_v2":{"content":"O(V+E)"}}
+
+For:
+
+* adjacency list
+* distance array
+* priority queue
+
+---
+
+# ❓ Why does Dijkstra fail for negative weights?
+
+Dijkstra assumes:
+
+```text
+Once shortest distance is finalized, it never changes.
+```
+
+This assumption breaks when negative edges exist.
+
+A negative edge may later produce a smaller distance.
+
+So Dijkstra can produce incorrect answers for graphs containing negative edge weights.
+
+---
+
+# 🔥 Dijkstra vs Bellman-Ford
+
+| Feature                  | Dijkstra   | Bellman-Ford |
+| ------------------------ | ---------- | ------------ |
+| Negative Weights         | ❌ No       | ✅ Yes        |
+| Faster                   | ✅ Yes      | ❌ Slower     |
+| Time Complexity          | O(E log V) | O(VE)        |
+| Negative Cycle Detection | ❌ No       | ✅ Yes        |
+
+---
+
+# 📝 Key Learning
+
+* Shortest Path Algorithms
+* Greedy Algorithms
+* Edge Relaxation
+* Priority Queue / Min Heap
+* Weighted Graphs
+* Difference between Dijkstra and Bellman-Ford
+
+---
+
+# 📘 notes.md
+
+```text
+1. Dijkstra works only for positive or zero weighted graphs.
+2. Uses greedy approach.
+3. Priority Queue helps choose minimum distance node.
+4. Edge relaxation updates shortest distances.
+5. Time Complexity = O(E log V).
+6. Faster than Bellman-Ford.
+7. Cannot handle negative edge weights.
+```
+
+---
+
+# 🚀 GitHub Repository Name Suggestion
+
+```text
+Week-16-Day-5-Dijkstra-Algorithm
+```
